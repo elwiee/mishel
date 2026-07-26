@@ -10,6 +10,44 @@ const revealObserver = new IntersectionObserver((entries) => {
 
 reveals.forEach((element) => revealObserver.observe(element));
 
+const siteHeader = document.querySelector('.nav');
+const siteNav = siteHeader?.querySelector('nav');
+let menuButton;
+
+if (siteHeader && siteNav) {
+  menuButton = document.createElement('button');
+  menuButton.className = 'menu-toggle';
+  menuButton.type = 'button';
+  menuButton.setAttribute('aria-label', 'Открыть меню');
+  menuButton.setAttribute('aria-expanded', 'false');
+  menuButton.innerHTML = '<span></span><span></span><span></span>';
+
+  const extraLink = siteHeader.querySelector('.nav-social');
+  if (extraLink) {
+    const mobileExtra = extraLink.cloneNode(true);
+    mobileExtra.className = 'mobile-nav-extra';
+    siteNav.appendChild(mobileExtra);
+  }
+
+  siteHeader.appendChild(menuButton);
+
+  const closeMenu = () => {
+    document.body.classList.remove('menu-open');
+    menuButton.setAttribute('aria-expanded', 'false');
+    menuButton.setAttribute('aria-label', 'Открыть меню');
+  };
+
+  menuButton.addEventListener('click', () => {
+    const open = !document.body.classList.contains('menu-open');
+    document.body.classList.toggle('menu-open', open);
+    menuButton.setAttribute('aria-expanded', String(open));
+    menuButton.setAttribute('aria-label', open ? 'Закрыть меню' : 'Открыть меню');
+  });
+  siteNav.querySelectorAll('a').forEach((link) => link.addEventListener('click', closeMenu));
+  document.addEventListener('keydown', (event) => { if (event.key === 'Escape') closeMenu(); });
+  window.addEventListener('resize', () => { if (window.innerWidth > 900) closeMenu(); });
+}
+
 const progress = document.querySelector('.progress span');
 const cinemaImage = document.querySelector('.cinema img');
 const finaleImage = document.querySelector('.finale > img');
@@ -37,6 +75,7 @@ if (!reducedMotion.matches) {
 function updateScrollEffects() {
   const max = document.documentElement.scrollHeight - window.innerHeight;
   progress.style.width = `${max > 0 ? (window.scrollY / max) * 100 : 0}%`;
+  siteHeader?.classList.toggle('is-scrolled', window.scrollY > 24);
 
   if (!reducedMotion.matches) {
     const progressRatio = max > 0 ? window.scrollY / max : 0;
